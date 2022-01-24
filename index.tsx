@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import EffectExample from './EffectExample';
+import ClsComp from './ClassComponent';
 import './style.css';
 
 interface AppProps {}
@@ -23,18 +24,20 @@ class App extends Component<AppProps, AppState> {
     this.setState({ effectVisible: !this.state.effectVisible });
   };
 
-  toggleEffectComponentName = () => {
+  changeCompName = () => {
     // React.memo 应用的地方，name 值未改变，组件并不 rerender
     this.setState({ name: this.state.name });
+    this.setState({ name: this.state.name + ' Changed' });
   };
+
 
   render() {
     const { effectVisible } = this.state;
     return (
       <div>
-        {effectVisible && <EffectExample name={this.state.name} />}
+        {/* {effectVisible && <EffectExample name={this.state.name} />} */}
         <p>
-          <button onClick={this.toggleEffectComponentName}>
+          <button onClick={this.changeCompName}>
             Toggle Effect Component Name
           </button>
           <br />
@@ -42,6 +45,7 @@ class App extends Component<AppProps, AppState> {
             Toggle Effect Component
           </button>
         </p>
+        <ClsComp value={this.state.name} />
       </div>
     );
   }
