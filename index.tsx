@@ -12,6 +12,7 @@ interface AppState {
 class App extends Component<AppProps, AppState> {
   constructor(props) {
     super(props);
+    this.inputRef = React.createRef();
     this.state = {
       name: 'EffectExample',
       effectVisible: true,
@@ -22,16 +23,25 @@ class App extends Component<AppProps, AppState> {
     this.setState({ effectVisible: !this.state.effectVisible });
   };
 
+  toggleEffectComponentName = () => {
+    // React.memo 应用的地方，name 值未改变，组件并不 rerender
+    this.setState({ name: this.state.name });
+  };
+
   render() {
     const { effectVisible } = this.state;
     return (
       <div>
         {effectVisible && <EffectExample name={this.state.name} />}
-        <button onClick={this.toggleEffectComponent}>
-          Toggle Effect Component
-        </button>
-
-        <p>Start editing to see some magic happen :)</p>
+        <p>
+          <button onClick={this.toggleEffectComponentName}>
+            Toggle Effect Component Name
+          </button>
+          <br />
+          <button onClick={this.toggleEffectComponent}>
+            Toggle Effect Component
+          </button>
+        </p>
       </div>
     );
   }

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-export default React.memo(({ name }) => {
+const EffectComponent = ({ name }) => {
   const [state, setState] = useState('init1');
+  const inputRef = useRef();
 
   // useEffect 的回调函数会在第一次 render 后依次被调用
   useEffect(() => {
@@ -9,7 +10,6 @@ export default React.memo(({ name }) => {
     console.log('2 mount effect =>', state);
 
     setState('mount set');
-    1;
 
     setTimeout(() => {
       setState('mount timout set');
@@ -41,12 +41,39 @@ export default React.memo(({ name }) => {
   // }, [state]);
 
   // First call
+  // console.log('main body name => ', name);
   console.log('1 / 4 main body =>', state);
 
+  const changeState = useCallback(() => {
+    // setState('change');
+    // 为什么值没有改变，但会重新渲染两次
+    console.log('value changed', inputRef.current.value === state);
+
+    setState(inputRef.current.value);
+  }, []);
+
+  const changeVal = useCallback((e) => {
+    // console.log('changeVal', e.target.value);
+    inputRef.current.value = e.target.value;
+  }, []);
+
   return (
-    <>
+    <div>
       <h1>Hello {name}!</h1>
-      <button onClick={() => setState('change')}>change state</button>
-    </>
+      <input type="text" onChange={changeVal} ref={inputRef} />
+      <button onClick={changeState}>change state</button>
+    </div>
   );
-});
+};
+
+// export default EffectComponent;
+
+// react memo 并不是组件整个组件的意思，而是当上一次的 prop 和新的 prop 对比时如果浅比较值一致，那一次渲染会被跳过
+export default React.memo(EffectComponent);
+
+// export default React.memo(
+//   EffectComponent,
+//   function customizeCompare(prevProps, newProps) {
+//     return true;
+//   }
+// );
