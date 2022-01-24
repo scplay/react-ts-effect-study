@@ -1,56 +1,67 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 const EffectComponent = ({ name }) => {
   const [state, setState] = useState('init1');
   const inputRef = useRef();
 
   // useEffect 的回调函数会在第一次 render 后依次被调用
-  useEffect(() => {
-    // second call
-    console.log('2 mount effect =>', state);
-
-    setState('mount set');
-
-    setTimeout(() => {
-      setState('mount timout set');
-
-      console.log('7 mount timeout call =>', state);
-    });
-
-    // only if component unmount by parent
-    return () => {
-      // the value of state always be the inital useState value
-      console.log('unmount =>', state);
-    };
-  }, []);
-
   // useEffect(() => {
   //   // second call
-  //   console.log('3 / 6 update effect =>', state);
+  //   console.log('2 mount effect =>', state);
+
+  //   setState('mount set');
 
   //   setTimeout(() => {
-  //     setState('update timout set');
+  //     setState('mount timout set');
 
-  //     console.log('8 / 9 update timeout call =>', state);
-  //   });
+  //     console.log('7 mount timeout call =>', state);
 
-  //   // would call every time before change value
+  //   }, 5000);
+
+  //   // only if component unmount by parent
   //   return () => {
-  //     console.log('5 update end =>', state);
+  //     // the value of state always be the inital useState value
+  //     console.log('unmount =>', state);
   //   };
-  // }, [state]);
+  // }, []);
+
+  useEffect(() => {
+    // second call
+    console.log('3 / 6 update effect =>', state);
+
+    setTimeout(() => {
+      // setState('update timout set');
+
+      console.log('8 / 9 update timeout call =>', state);
+    });
+
+    // would call every time before change value
+    return () => {
+      console.log('5 update end =>', state);
+    };
+  }, [state]);
 
   // First call
   // console.log('main body name => ', name);
   console.log('1 / 4 main body =>', state);
 
-  const changeState = useCallback(() => {
+  const changeState = () => {
     // setState('change');
-    // 为什么值没有改变，但会重新渲染两次
-    console.log('value changed', inputRef.current.value === state);
+    setState((prv) => {
+      console.log('prev state =>', prv);
 
-    setState(inputRef.current.value);
-  }, []);
+      return 'callback change';
+    });
+    // 为什么值没有改变，但会重新渲染两次，搜索 STO 一些回答说是 react 只是 state 不变时尽可能不重新渲染？但不保证？
+    // console.log('value changed', inputRef.current.value === state);
+    // setState(inputRef.current.value);
+  };
 
   const changeVal = useCallback((e) => {
     // console.log('changeVal', e.target.value);
@@ -59,9 +70,12 @@ const EffectComponent = ({ name }) => {
 
   return (
     <div>
-      <h1>Hello {name}!</h1>
+      <h1>
+        Hello {name}! : {state}
+      </h1>
       <input type="text" onChange={changeVal} ref={inputRef} />
       <button onClick={changeState}>change state</button>
+      <button onClick={changeState}>change state 2</button>
     </div>
   );
 };
@@ -77,3 +91,10 @@ export default React.memo(EffectComponent);
 //     return true;
 //   }
 // );
+
+// 函数组件 执行顺序
+// 1. render 函数体
+// 2. useEffect 中的回调，按顺序同步执行
+// 3. useEffect 中的 setState()
+// 4. render 函数体 获取新的 state
+// 5. useEffect 回调函数的返回值函数，获取的值是上一次的 state <- 这一步是怎么做到的？？明明上一步 render 已经获取了新的 state
