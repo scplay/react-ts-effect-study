@@ -6,9 +6,18 @@ import React, {
   useState,
 } from 'react';
 
+let globV = 1;
+
+const CompInComp = React.memo(({ name }) => {
+  return <span>{console.log('render comp in comp') || name}</span>;
+});
+
 const EffectComponent = ({ name }) => {
   const [state, setState] = useState('init');
+  const [state1, setState1] = useState('init');
   const inputRef = useRef();
+
+  // setState('drager');
 
   // useEffect 的回调函数会在第一次 render 后依次被调用
   useEffect(() => {
@@ -22,11 +31,13 @@ const EffectComponent = ({ name }) => {
     console.log('after mount set =>', state);
 
     setTimeout(() => {
+      globV = 2;
+
       // 如果在 timeout 中 setState render 会同步执行
       console.log('before timeout set =>', state);
-      setState(prev => {
+      setState((prev) => {
         console.log('settimeout setState callback =>', prev);
-        return prev
+        return prev + ' in timeout';
       });
       // 此时只修改了下次 render useState 返回的 state 的值，此函数中的 state 是通过闭包保持的上一次的 state 值
       console.log('after timeout set =>', state);
@@ -34,25 +45,31 @@ const EffectComponent = ({ name }) => {
 
     // only if component unmount by parent
     return () => {
+      globV = 1;
       // the value of state always be the inital useState value
       console.log('unmount =>', state);
     };
   }, []);
 
   useEffect(() => {
-  //   // second call
+    console.log(globV);
+  }, [globV]);
+
+  useEffect(() => {
+    return;
+    //   // second call
     console.log('update effect =>', state);
 
-  //   setTimeout(() => {
-  //     // setState('update timout set');
+    //   setTimeout(() => {
+    //     // setState('update timout set');
 
-  //     console.log('8 / 9 update timeout call =>', state);
-  //   });
+    //     console.log('8 / 9 update timeout call =>', state);
+    //   });
 
-  //   // would call every time before change value
-  //   return () => {
-  //     console.log('5 update end =>', state);
-  //   };
+    //   // would call every time before change value
+    return () => {
+      console.log('update end =>', state);
+    };
   }, [state]);
 
   // First call
@@ -73,6 +90,17 @@ const EffectComponent = ({ name }) => {
     // setState(inputRef.current.value);
   };
 
+  const changeState1 = () => {
+    // setState('change');
+
+    // console.log('Before prev state =>', state);
+    // TODO: setState 传入一个函数和直接获取当前的 state 不都是之前的 state 吗？
+    setState1('' + Date.now());
+    // 为什么值没有改变，但会重新渲染两次，搜索 STO 一些回答说是 react 只是 state 不变时尽可能不重新渲染？但不保证？
+    // console.log('value changed', inputRef.current.value === state);
+    // setState(inputRef.current.value);
+  };
+
   const changeVal = useCallback((e) => {
     // console.log('changeVal', e.target.value);
     inputRef.current.value = e.target.value;
@@ -86,7 +114,8 @@ const EffectComponent = ({ name }) => {
       </h1>
       <input type="text" onChange={changeVal} ref={inputRef} />
       <button onClick={changeState}>change state</button>
-      <button onClick={changeState}>change state 2</button>
+      <button onClick={changeState1}>change state 2</button>
+      <CompInComp name={state} />
     </div>
   );
 };

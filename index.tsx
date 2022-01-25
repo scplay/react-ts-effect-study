@@ -35,7 +35,7 @@ class App extends Component<AppProps, AppState> {
     const { effectVisible } = this.state;
     return (
       <div>
-        {/* {effectVisible && <EffectExample name={this.state.name} />} */}
+        {effectVisible && <EffectExample name={this.state.name} />}
         <p>
           <button onClick={this.changeCompName}>
             Toggle Effect Component Name
@@ -45,7 +45,7 @@ class App extends Component<AppProps, AppState> {
             Toggle Effect Component
           </button>
         </p>
-        <ClsComp value={this.state.name} />
+        {/* <ClsComp value={this.state.name} /> */}
       </div>
     );
   }
