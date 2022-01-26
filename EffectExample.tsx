@@ -8,8 +8,12 @@ import React, {
 
 let globV = 1;
 
-const CompInComp = React.memo(({ name }) => {
-  return <span>{console.log('render comp in comp') || name}</span>;
+const CompInComp = React.memo(({ name, setter }) => {
+  return (
+    <span onClick={() => setter(Date.now())}>
+      {console.log('render comp in comp') || name}
+    </span>
+  );
 });
 
 const EffectComponent = ({ name }) => {
@@ -21,6 +25,8 @@ const EffectComponent = ({ name }) => {
 
   // useEffect 的回调函数会在第一次 render 后依次被调用
   useEffect(() => {
+    return;
+
     // 如果在 effect 回调 or 事件中执行 setState, render 会稍后执行
     console.log('before mount set =>', state);
     setState('mount set');
@@ -52,6 +58,8 @@ const EffectComponent = ({ name }) => {
   }, []);
 
   useEffect(() => {
+    return;
+
     console.log(globV);
   }, [globV]);
 
@@ -106,6 +114,15 @@ const EffectComponent = ({ name }) => {
     inputRef.current.value = e.target.value;
   }, []);
 
+  useEffect(() => {
+    // setState('repeat setState');
+    // console.log('every time');
+
+    return () => {
+      console.log('every time return');
+    };
+  });
+
   return (
     <div>
       {console.log('body rendered', state)}
@@ -115,7 +132,7 @@ const EffectComponent = ({ name }) => {
       <input type="text" onChange={changeVal} ref={inputRef} />
       <button onClick={changeState}>change state</button>
       <button onClick={changeState1}>change state 2</button>
-      <CompInComp name={state} />
+      <CompInComp name={state} setter={setState} />
     </div>
   );
 };
